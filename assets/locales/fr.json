@@ -1,0 +1,8 @@
+{
+    "welcome": "Bienvenue",
+    "hi": "Hello",
+    "badlogin": "Bad Login",
+    "goodlogin": "Ok Login",
+    "badcreds": "invalid username or password",
+    "loginform": "Login"
+}
