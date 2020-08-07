@@ -3,9 +3,12 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:slim/slim.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:sms/contact.dart';
 import 'package:sms/sms.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:textme/settings/assets.dart';
+
+import 'chat.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -14,7 +17,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   SmsQuery query = new SmsQuery();
-  List<SmsMessage> messages;
+  SimCardsProvider provider = new SimCardsProvider();
+
+  List<SmsThread> threads;
   bool loader = false;
   bool showFloatButton = true;
 
@@ -61,10 +66,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future init() async {
-    messages = await query.getAllSms;
+    threads = await query.getAllThreads;
     setState(() {
       loader = true;
     });
+
+    UserProfileProvider provider = new UserProfileProvider();
+    UserProfile profile = await provider.getUserProfile();
+    print("User profile");
+    print(profile.addresses);
+    print(profile.thumbnail);
+    print(profile.fullName);
   }
 
   @override
@@ -79,16 +91,18 @@ class _HomePageState extends State<HomePage> {
               _onEndScroll(scrollNotification.metrics);
             }
           },
-          child: SafeArea(
+          child: Container(
+              height: MediaQuery.of(context).size.height,
+              color: Colors.black,
               child: loader
                   ? ListView.builder(
-                      itemCount: messages.length,
+                      shrinkWrap: true,
+                      itemCount: threads.length,
                       itemBuilder: (BuildContext context, int index) {
-                        return messageWidget(messages[index]);
+                        return messageWidget(threads[index]);
                       },
                     )
                   : Center())),
-      floatingActionButtonAnimator: AnimationToolkit.floatingButtonAnimator,
       floatingActionButton: showFloatButton
           ? FloatingActionButton(
               onPressed: () {},
@@ -98,18 +112,33 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget messageWidget(SmsMessage msg) {
+  Widget messageWidget(SmsThread conversation) {
     double width = MediaQuery.of(context).size.width;
     //Contact c = refreshContacts(msg.address);
     return Container(
         child: ListTile(
       onTap: () {
-        print("OnTap");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ConversationPage(thread: conversation)),
+        );
       },
       title: Row(
         children: <Widget>[
           CircleAvatar(
-            child: Text("C"),
+            child: conversation.contact.photo != null
+                ? CircleAvatar(
+                    maxRadius: 25,
+                    backgroundImage:
+                        MemoryImage(conversation.contact.photo.bytes))
+                : CircleAvatar(
+                    child: Text(
+                    conversation.contact.fullName != null
+                        ? getInitials(conversation.contact.fullName)
+                        : getInitials(conversation.contact.address),
+                    style: TextStyle(fontSize: 20),
+                  )),
             maxRadius: 25,
           ),
           Container(
@@ -119,15 +148,21 @@ class _HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    msg.address,
+                    conversation.contact.fullName != null
+                        ? conversation.contact.fullName
+                        : conversation.contact.address,
                     softWrap: true,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 15,
+                        color: Colors.white),
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    msg.body,
+                    conversation.messages.first.body,
                     softWrap: true,
-                    style: TextStyle(fontWeight: FontWeight.w400),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w400, color: Colors.white54),
                     overflow: TextOverflow.ellipsis,
                   )
                 ],

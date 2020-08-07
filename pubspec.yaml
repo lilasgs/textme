@@ -33,6 +33,7 @@ dependencies:
   flutter_icons: ^1.0.0+1
   font_awesome_flutter: ^8.8.1
   dash_chat: ^1.1.14
+  cached_network_image: ^2.2.0+1
 
 
   # The following adds the Cupertino Icons font to your application.

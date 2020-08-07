@@ -1,26 +1,18 @@
 import 'package:flutter/material.dart';
 
-class AnimationToolkit {
-  // ...
-  static const FloatingActionButtonAnimator floatingButtonAnimator =
-      _FloatingButtonAnimator();
-}
+String getInitials(bank_account_name) {
+  List<String> names = bank_account_name.split(" ");
+  String initials = "";
+  int numWords = 2;
 
-class _FloatingButtonAnimator extends FloatingActionButtonAnimator {
-  const _FloatingButtonAnimator();
-
-  @override
-  Animation<double> getScaleAnimation({Animation<double> parent}) {
-    return Tween<double>(begin: 1.0, end: 1.0).animate(parent);
+  if (numWords < names.length) {
+    numWords = 2;
+  } else {
+    numWords = 1;
   }
 
-  @override
-  Animation<double> getRotationAnimation({Animation<double> parent}) {
-    return Tween<double>(begin: 0, end: 1.0).animate(parent);
+  for (var i = 0; i < numWords; i++) {
+    initials += '${names[i][0]}';
   }
-
-  @override
-  Offset getOffset({Offset begin, Offset end, double progress}) {
-    return end;
-  }
+  return initials;
 }
